@@ -1,22 +1,22 @@
-﻿using RegistrationForm.Model;
+﻿using RegistrationForm.Dto;
+using RegistrationForm.Model;
 
 namespace RegistrationForm.Services
 {
     public interface IUserService
     {
         // Create
-        Task RegisterUser(User user);
+        Task<bool> RegisterUser(CreateUserRequest request);
 
         // Read
         Task<List<User>> GetUsersByEmail(string query);
         Task<List<User>> GetUsers();
 
         // Update
-        Task<User> UpdateUser(User user);
-        Task<User> UpdateUser(String email);
+        Task<bool> UpdateUser(UpdateUserRequest request);
 
         // Delete
-        Task DeleteUser(string email);
+        Task<bool> DeleteUser(string email);
 
     }
 }

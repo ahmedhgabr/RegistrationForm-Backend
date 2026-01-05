@@ -1,37 +1,67 @@
-﻿using RegistrationForm.Model;
+﻿using Microsoft.EntityFrameworkCore;
+using RegistrationForm.Data;
+using RegistrationForm.Dto;
+using RegistrationForm.Model;
 
 namespace RegistrationForm.Services
 {
-    public class UserService : IUserService
+    public class UserService(AppDBContext context) : IUserService
     {
-        public Task RegisterUser(User user)
+        // Create
+        public async Task<bool> RegisterUser(CreateUserRequest request)
         {
-            throw new NotImplementedException();
+            var newUser = new User
+            {
+                Name = request.Name,
+                Email = request.Email,
+                Phone = request.Phone,
+                Age = request.Age
+            };
+            context.Users.Add(newUser);
+            await context.SaveChangesAsync();
+            return true;
         }
 
-        public Task<List<User>> GetUsersByEmail(string query)
+        // Read
+        public async Task<List<User>> GetUsersByEmail(string query)
         {
-            throw new NotImplementedException();
+            var users = await context.Users
+                .Where(u => u.Email.Contains(query))
+                .ToListAsync();
+            return users;
         }
 
         public async Task<List<User>> GetUsers()
+            => await context.Users.ToListAsync();
+
+        // Update
+        public async Task<bool> UpdateUser(UpdateUserRequest request)
         {
-            throw new NotImplementedException();
+            var existingUser = await context.Users.SingleOrDefaultAsync(u => u.Email == request.Email);
+            if (existingUser == null)
+            {
+                throw new InvalidOperationException("User not found.");
+            }
+
+            existingUser.Name = request.UpdatedName ?? existingUser.Name;
+            existingUser.Email = request.UpdatedEmail ?? existingUser.Email;
+            existingUser.Phone = request.UpdatedPhone ?? existingUser.Phone;
+            existingUser.Age = request.UpdatedAge ?? existingUser.Age;
+            await context.SaveChangesAsync();
+            return true;
         }
 
-
-        public Task<User> UpdateUser(User user)
+        // Delete
+        public async Task<bool> DeleteUser(string email)
         {
-            throw new NotImplementedException();
-        }
-
-        public Task<User> UpdateUser(string email)
-        {
-            throw new NotImplementedException();
-        }
-        public Task DeleteUser(string email)
-        {
-            throw new NotImplementedException();
+            var user = await context.Users.SingleOrDefaultAsync(u => u.Email == email);
+            if (user == null)
+            {
+                throw new InvalidOperationException("User not found.");
+            }
+            context.Users.Remove(user);
+            await context.SaveChangesAsync();
+            return true;
         }
     }
 }
