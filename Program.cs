@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using RegistrationForm.Services;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,6 +10,8 @@ builder.Services.AddControllers();
 
 // Add OpenAPI services
 builder.Services.AddOpenApi();
+
+builder.Services.AddScoped<IUserService,UserService>();
 
 var app = builder.Build();
 
