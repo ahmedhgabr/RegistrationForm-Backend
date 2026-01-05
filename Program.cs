@@ -1,4 +1,6 @@
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using RegistrationForm.Data;
 using RegistrationForm.Services;
 using Scalar.AspNetCore;
 
@@ -10,6 +12,10 @@ builder.Services.AddControllers();
 
 // Add OpenAPI services
 builder.Services.AddOpenApi();
+
+builder.Services.AddDbContext<AppDBContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
+);
 
 builder.Services.AddScoped<IUserService,UserService>();
 
