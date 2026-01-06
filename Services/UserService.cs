@@ -10,6 +10,12 @@ namespace RegistrationForm.Services
         // Create
         public async Task<bool> RegisterUser(CreateUserRequest request)
         {
+            var emailExists = await context.Users.AnyAsync(u => u.Email == request.Email);
+
+            if (emailExists)
+            {
+                throw new InvalidOperationException($"A user with email '{request.Email}' already exists.");
+            }
             var newUser = new User
             {
                 Name = request.Name,
