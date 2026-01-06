@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using RegistrationForm.Data;
 using RegistrationForm.Services;
 using Scalar.AspNetCore;
