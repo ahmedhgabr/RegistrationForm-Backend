@@ -4,9 +4,7 @@ namespace RegistrationForm.Dto
 {
     public class UpdateUserRequest
     {
-        [Required(ErrorMessage = "Email is required to identify the user")]
-        [EmailAddress(ErrorMessage = "Invalid email format")]
-        public required string Email { get; set; }
+        public required int Id { get; set; }
 
         [RegularExpression(@"^[a-zA-Z\s]+$", ErrorMessage = "Name cannot contain numbers or special characters")]
         [StringLength(100, MinimumLength = 2, ErrorMessage = "Name must be between 2 and 100 characters")]

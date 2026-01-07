@@ -73,12 +73,12 @@ namespace RegistrationForm.Controllers
             }
         }
 
-        [HttpDelete("delete/{email}")]
-        public async Task<ActionResult> DeleteUser(string email)
+        [HttpDelete("delete/{id}")]
+        public async Task<ActionResult> DeleteUser(int id)
         {
             try
             {
-                await service.DeleteUser(email);
+                await service.DeleteUser(id);
                 return NoContent();
             }
             catch (KeyNotFoundException ex)

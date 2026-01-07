@@ -16,7 +16,7 @@ namespace RegistrationForm.Services
         Task<bool> UpdateUser(UpdateUserRequest request);
 
         // Delete
-        Task<bool> DeleteUser(string email);
+        Task<bool> DeleteUser(int id);
 
     }
 }

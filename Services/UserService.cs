@@ -43,7 +43,7 @@ namespace RegistrationForm.Services
         // Update
         public async Task<bool> UpdateUser(UpdateUserRequest request)
         {
-            var existingUser = await context.Users.SingleOrDefaultAsync(u => u.Email == request.Email);
+            var existingUser = await context.Users.FindAsync(request.Id);
             if (existingUser == null)
             {
                 throw new InvalidOperationException("User not found.");
@@ -58,9 +58,9 @@ namespace RegistrationForm.Services
         }
 
         // Delete
-        public async Task<bool> DeleteUser(string email)
+        public async Task<bool> DeleteUser(int id)
         {
-            var user = await context.Users.SingleOrDefaultAsync(u => u.Email == email);
+            var user = await context.Users.FindAsync(id);
             if (user == null)
             {
                 throw new InvalidOperationException("User not found.");
