@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using RegistrationForm.Dto;
+using RegistrationForm.Exceptions;
 using RegistrationForm.Model;
 using RegistrationForm.Services;
 
@@ -21,9 +22,8 @@ namespace RegistrationForm.Controllers
             {
                 await service.RegisterUser(request);
                 return NoContent();
-                //return Ok(new { Message = "User registered successfully", User = requst });
             }
-            catch (InvalidOperationException ex)
+            catch (DuplicateEmailException ex)
             {
                 return Conflict(new { Message = ex.Message });
             }
@@ -39,7 +39,7 @@ namespace RegistrationForm.Controllers
             var users = await service.GetUsersByEmail(query);
             if (users.Count == 0)
             {
-                return NotFound("No users found.");
+                return NotFound(new { Message = "No users found." });
             }
             return Ok(users);
         }
@@ -60,16 +60,19 @@ namespace RegistrationForm.Controllers
             try
             {
                 await service.UpdateUser(request);
-                //return Ok(new { Message = "User updated successfully"});
                 return NoContent();
             }
-            catch (InvalidOperationException ex)
+            catch (UserNotFoundException ex)
             {
-                return NotFound(ex.Message);
+                return NotFound(new { Message = ex.Message });
+            }
+            catch (DuplicateEmailException ex)
+            {
+                return Conflict(new { Message = ex.Message });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { Message = "An error occurred while updating the user" + ex.Message });
+                return StatusCode(500, new { Message = "An error occurred while updating the user", Error = ex.Message });
             }
         }
 
@@ -81,13 +84,13 @@ namespace RegistrationForm.Controllers
                 await service.DeleteUser(id);
                 return NoContent();
             }
-            catch (KeyNotFoundException ex)
+            catch (UserNotFoundException ex)
             {
-                return NotFound(ex.Message);
+                return NotFound(new { Message = ex.Message });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { Message = "An error occurred while deleting the user" + ex.Message });
+                return StatusCode(500, new { Message = "An error occurred while deleting the user", Error = ex.Message });
             }
         }
     }

@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RegistrationForm.Data;
 using RegistrationForm.Dto;
+using RegistrationForm.Exceptions;
 using RegistrationForm.Model;
 
 namespace RegistrationForm.Services
@@ -14,7 +15,7 @@ namespace RegistrationForm.Services
 
             if (emailExists)
             {
-                throw new InvalidOperationException($"A user with email '{request.Email}' already exists.");
+                throw new DuplicateEmailException(request.Email);
             }
             var newUser = new User
             {
@@ -46,14 +47,41 @@ namespace RegistrationForm.Services
             var existingUser = await context.Users.FindAsync(request.Id);
             if (existingUser == null)
             {
-                throw new InvalidOperationException("User not found.");
+                throw new UserNotFoundException(request.Id);
             }
 
-            existingUser.Name = request.UpdatedName ?? existingUser.Name;
-            existingUser.Email = request.UpdatedEmail ?? existingUser.Email;
-            existingUser.Phone = request.UpdatedPhone ?? existingUser.Phone;
-            existingUser.Age = request.UpdatedAge ?? existingUser.Age;
-            await context.SaveChangesAsync();
+            // Check if trying to update email to one that already exists
+            if (request.UpdatedEmail != null && request.UpdatedEmail != existingUser.Email)
+            {
+                var emailExists = await context.Users
+                    .AnyAsync(u => u.Email == request.UpdatedEmail && u.Id != request.Id);
+                
+                if (emailExists)
+                {
+                    throw new DuplicateEmailException(request.UpdatedEmail);
+                }
+                existingUser.Email = request.UpdatedEmail;
+            }
+
+            if (request.UpdatedName != null)
+                existingUser.Name = request.UpdatedName;
+            
+            // Handle phone: empty string = remove, null = don't change, value = update
+            if (request.UpdatedPhone != null)
+            {
+                existingUser.Phone = string.IsNullOrWhiteSpace(request.UpdatedPhone) 
+                    ? null 
+                    : request.UpdatedPhone;
+            }
+            
+            if (request.UpdatedAge.HasValue)
+                existingUser.Age = request.UpdatedAge.Value;
+
+            if (context.ChangeTracker.HasChanges())
+            {
+                await context.SaveChangesAsync();
+            }
+            
             return true;
         }
 
@@ -63,7 +91,7 @@ namespace RegistrationForm.Services
             var user = await context.Users.FindAsync(id);
             if (user == null)
             {
-                throw new InvalidOperationException("User not found.");
+                throw new UserNotFoundException(id);
             }
             context.Users.Remove(user);
             await context.SaveChangesAsync();
